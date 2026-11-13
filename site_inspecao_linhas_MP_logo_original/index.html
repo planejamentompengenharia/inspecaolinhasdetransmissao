@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b50"><meta name="description" content="Inspeção de linhas de transmissão — funciona offline">
+<link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css">
+<title>Inspeção de Linhas de Transmissão</title>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img class="logo-mp" src="assets/logo-mp.png" alt="MP Engenharia Elétrica"><div class="brand-copy"><strong>Inspeção de Linhas de Transmissão</strong><small>Checklist operacional · modo offline</small></div></div>
+  <div class="head-actions"><span id="saveState" class="save">● Salvo neste dispositivo</span><button class="btn ghost" id="installBtn" hidden>Instalar app</button></div>
+</header>
+<main>
+<section class="intro">
+ <div><p class="eyebrow">RELATÓRIO DE CAMPO</p><h1>Inspeção de LT</h1><p class="muted">Preencha os dados da inspeção e marque cada ponto verificado como regular ou irregular.</p></div>
+ <div class="actions"><button class="btn secondary" id="exportBtn">Exportar backup</button><button class="btn secondary" id="importBtn">Importar backup</button><button class="btn primary" id="printBtn">Imprimir / PDF</button><input type="file" id="importFile" accept="application/json" hidden></div>
+</section>
+<section class="panel">
+ <div class="section-head"><div><h2>Identificação da inspeção</h2><p class="muted">Informações gerais da linha e da equipe.</p></div></div>
+ <div class="form-grid">
+  <label>Setor<input id="setor" autocomplete="organization"></label>
+  <label>Nome da LT<input id="lt"></label>
+  <label>Nº Torre / Tipo<input id="torre"></label>
+  <label>Data da inspeção<input id="data" type="date"></label>
+  <label class="span2">Chefe da equipe de LTs<input id="chefe"></label>
+  <label class="span2">Observações gerais<textarea id="observacoes" rows="3"></textarea></label>
+ </div>
+</section>
+<section class="stats">
+ <div class="stat"><span>Pontos verificados</span><strong id="checkedCount">0/0</strong></div>
+ <div class="stat"><span>Regulares</span><strong class="green" id="regularCount">0</strong></div>
+ <div class="stat"><span>Irregulares</span><strong class="red" id="irregularCount">0</strong></div>
+ <div class="stat"><span>Sem avaliação</span><strong id="pendingCount">0</strong></div>
+</section>
+<section class="toolbar">
+ <input id="search" class="search" placeholder="Buscar item, código ou categoria…" aria-label="Buscar">
+ <select id="filter" aria-label="Filtrar situação"><option value="all">Todas as situações</option><option value="pending">Sem avaliação</option><option value="REG">Regulares</option><option value="IRREG">Irregulares</option></select>
+ <button class="btn ghost" id="expandBtn">Expandir tudo</button>
+</section>
+<div id="checklist"></div>
+<section class="panel footer-panel">
+ <div class="section-head"><div><h2>Finalização</h2><p class="muted">Revise os itens irregulares antes de emitir o relatório.</p></div></div>
+ <div class="sign-grid"><label>Responsável pela inspeção<input id="responsavel" placeholder="Nome / assinatura"></label><label>Data de encerramento<input id="dataFim" type="date"></label></div>
+ <div class="final-notes"><label for="observacoesFinais">Observações finais da inspeção</label><textarea id="observacoesFinais" rows="4" placeholder="Registre recomendações, pendências, condições encontradas e outras informações importantes..."></textarea></div>
+ <div class="photo-area">
+  <label for="fotosInspecao" class="photo-label">Fotos da inspeção</label>
+  <p class="muted">Adicione até 5 fotos. As imagens serão reduzidas para facilitar o armazenamento offline.</p>
+  <input id="fotosInspecao" type="file" accept="image/*" multiple>
+  <div id="photoPreview" class="photo-preview"></div>
+ </div>
+ <div class="bottom-actions"><button class="btn secondary" id="resetBtn">Limpar formulário</button><button class="btn primary" id="printBottom">Imprimir / salvar em PDF</button></div>
+</section>
+<footer>Os dados ficam armazenados neste navegador. Exporte um backup para transferir ou guardar suas inspeções.</footer>
+</main>
+<script src="app.js"></script>
+</body></html>
