@@ -2,11 +2,11 @@ const SOURCE={"defaults": {"setor": "OPERACIONAL", "lt": "230KV ARAUCO", "torre"
 const STORAGE="lt-inspecao-v1";
 let state;
 const $=id=>document.getElementById(id);
-function fresh(){return {header:{...SOURCE.defaults,responsavel:"",dataFim:""},sections:SOURCE.sections.map(s=>({...s,items:s.items.map(i=>({...i}))}))}}
-function load(){try{const saved=JSON.parse(localStorage.getItem(STORAGE));if(saved&&saved.sections)return saved}catch(e){}return fresh()}
+function fresh(){return {header:{...SOURCE.defaults,responsavel:"",dataFim:"",observacoesFinais:""},photos:[],sections:SOURCE.sections.map(s=>({...s,items:s.items.map(i=>({...i}))}))}}
+function load(){try{const saved=JSON.parse(localStorage.getItem(STORAGE));if(saved&&saved.sections){saved.header.observacoesFinais=saved.header.observacoesFinais||"";saved.photos=saved.photos||[];return saved}}catch(e){}return fresh()}
 state=load();
-const fields=["setor","lt","torre","data","chefe","observacoes","responsavel","dataFim"];
-function persist(){localStorage.setItem(STORAGE,JSON.stringify(state));$("saveState").textContent="● Salvo neste dispositivo";updateStats()}
+const fields=["setor","lt","torre","data","chefe","observacoes","responsavel","dataFim","observacoesFinais"];
+function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(state));$("saveState").textContent="● Salvo neste dispositivo";updateStats()}catch(e){$("saveState").textContent="⚠ Armazenamento cheio";alert("O armazenamento do navegador está cheio. Remova algumas fotos ou exporte um backup.")}}
 function bindHeader(){fields.forEach(k=>{const el=$(k);el.value=state.header[k]||"";el.addEventListener("input",()=>{state.header[k]=el.value;persist()})})}
 function counts(){let all=state.sections.flatMap(s=>s.items);return {total:all.length,reg:all.filter(i=>i.status==="REG").length,irr:all.filter(i=>i.status==="IRREG").length,pending:all.filter(i=>!i.status).length}}
 function updateStats(){const c=counts();$("checkedCount").textContent=(c.total-c.pending)+"/"+c.total;$("regularCount").textContent=c.reg;$("irregularCount").textContent=c.irr;$("pendingCount").textContent=c.pending}
@@ -41,14 +41,45 @@ function render(){
  updateStats()
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderPhotos(){
+ const root=$("photoPreview");root.innerHTML="";
+ (state.photos||[]).forEach((photo,index)=>{
+  const card=document.createElement("div");card.className="photo-card";
+  const img=document.createElement("img");img.src=photo.data;img.alt=photo.name||("Foto "+(index+1));
+  const caption=document.createElement("span");caption.textContent=photo.name||("Foto "+(index+1));
+  const remove=document.createElement("button");remove.type="button";remove.className="remove-photo";remove.textContent="Remover";remove.onclick=()=>{state.photos.splice(index,1);persist();renderPhotos()};
+  card.append(img,caption,remove);root.appendChild(card);
+ });
+}
+function resizePhoto(file){
+ return new Promise((resolve,reject)=>{
+  const reader=new FileReader();reader.onerror=reject;
+  reader.onload=()=>{
+   const img=new Image();img.onerror=reject;
+   img.onload=()=>{
+    const scale=Math.min(1,1280/Math.max(img.width,img.height));
+    const canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+    canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+    resolve({data:canvas.toDataURL("image/jpeg",0.68),name:file.name});
+   };img.src=reader.result;
+  };reader.readAsDataURL(file);
+ });
+}
+$("fotosInspecao").addEventListener("change",async e=>{
+ const files=[...e.target.files];const slots=5-(state.photos||[]).length;
+ if(files.length>slots)alert("É possível manter até 5 fotos por inspeção. Serão adicionadas apenas as primeiras "+Math.max(0,slots)+".");
+ try{for(const file of files.slice(0,Math.max(0,slots))){if(!file.type.startsWith("image/"))continue;state.photos.push(await resizePhoto(file));persist()}renderPhotos()}
+ catch(err){alert("Não foi possível carregar uma das imagens. Tente uma foto menor.");}
+ e.target.value="";
+});
 function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`inspecao-LT-${state.header.data||"backup"}.json`;a.click();URL.revokeObjectURL(url)}
 $("search").addEventListener("input",render);$("filter").addEventListener("change",render);
 $("exportBtn").onclick=exportData;$("importBtn").onclick=()=>$("importFile").click();
-$("importFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!d.header||!Array.isArray(d.sections))throw Error();state=d;bindHeader();persist();render();alert("Backup importado com sucesso.")}catch(err){alert("Arquivo de backup inválido.")}e.target.value=""};
+$("importFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!d.header||!Array.isArray(d.sections))throw Error();state=d;state.header.observacoesFinais=state.header.observacoesFinais||"";state.photos=state.photos||[];bindHeader();persist();render();renderPhotos();alert("Backup importado com sucesso.")}catch(err){alert("Arquivo de backup inválido.")}e.target.value=""};
 $("printBtn").onclick=$("printBottom").onclick=()=>{document.querySelectorAll(".category").forEach(c=>c.classList.remove("closed"));window.print()};
 $("expandBtn").onclick=()=>{const closed=[...document.querySelectorAll(".category")].some(c=>c.classList.contains("closed"));document.querySelectorAll(".category").forEach(c=>c.classList.toggle("closed",!closed));$("expandBtn").textContent=closed?"Recolher tudo":"Expandir tudo"};
 $("resetBtn").onclick=()=>{if(confirm("Apagar os dados desta inspeção e restaurar os valores iniciais da planilha?")){state=fresh();bindHeader();persist();render()}};
-bindHeader();render();
+bindHeader();render();renderPhotos();
 let deferredPrompt;$("installBtn").hidden=true;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").hidden=false});
 $("installBtn").onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;$("installBtn").hidden=true}};

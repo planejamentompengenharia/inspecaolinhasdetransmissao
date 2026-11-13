@@ -42,6 +42,13 @@
 <section class="panel footer-panel">
  <div class="section-head"><div><h2>Finalização</h2><p class="muted">Revise os itens irregulares antes de emitir o relatório.</p></div></div>
  <div class="sign-grid"><label>Responsável pela inspeção<input id="responsavel" placeholder="Nome / assinatura"></label><label>Data de encerramento<input id="dataFim" type="date"></label></div>
+ <div class="final-notes"><label for="observacoesFinais">Observações finais da inspeção</label><textarea id="observacoesFinais" rows="4" placeholder="Registre recomendações, pendências, condições encontradas e outras informações importantes..."></textarea></div>
+ <div class="photo-area">
+  <label for="fotosInspecao" class="photo-label">Fotos da inspeção</label>
+  <p class="muted">Adicione até 5 fotos. As imagens serão reduzidas para facilitar o armazenamento offline.</p>
+  <input id="fotosInspecao" type="file" accept="image/*" multiple>
+  <div id="photoPreview" class="photo-preview"></div>
+ </div>
  <div class="bottom-actions"><button class="btn secondary" id="resetBtn">Limpar formulário</button><button class="btn primary" id="printBottom">Imprimir / salvar em PDF</button></div>
 </section>
 <footer>Os dados ficam armazenados neste navegador. Exporte um backup para transferir ou guardar suas inspeções.</footer>
