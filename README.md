@@ -20,3 +20,7 @@ O armazenamento é local ao navegador e dispositivo. Use **Exportar backup** reg
 
 ## Atualização: observações finais e fotos
 A versão atual inclui um campo de observações finais e anexos de até 5 fotos por inspeção. As fotos são reduzidas no próprio navegador e ficam no armazenamento local junto com os dados; também entram no backup JSON e aparecem na impressão/PDF. Para evitar perda de registros, exporte backups com frequência. O armazenamento continua sendo local ao navegador/dispositivo.
+
+
+## Campos sem preenchimento automático
+Na abertura de uma nova inspeção, os campos Nº Torre/Tipo, Data da inspeção, Chefe da equipe e Observações gerais começam em branco. Os dados já salvos anteriormente no navegador não são apagados automaticamente.
